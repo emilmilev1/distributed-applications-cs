@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50) // Max 50 chars
+  email     String   @unique @db.VarChar(100) // Max 100 chars
+  password  String   @db.VarChar(255) // Max 255 chars
+  role      String   @default("USER") @db.VarChar(20) // Max 20 chars
+  createdAt DateTime @default(now())
+  decks     Deck[]
+
+  @@map("users")
+}
+
+model Deck {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50) // Max 50 chars
+  description String   @db.VarChar(255) // Max 255 chars
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  isPublic    Boolean @default(false)
+
+  user        User     @relation(fields: [userId], references: [id])
+  cards       Card[]   @relation("DeckCards")
+
+  @@map("decks")
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100) // Max 100 chars
+  iconUrl     String   @db.VarChar(255) // Max 255 chars (URL of the card image)
+  rarity      String   @db.VarChar(20)  // Max 20 chars
+  cost        Int
+  power       Float
+  createdAt   DateTime @default(now())
+  deckId      Int
+  deck        Deck     @relation("DeckCards", fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@map("cards")
+}
+

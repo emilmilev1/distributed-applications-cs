@@ -1,0 +1,22 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- DropForeignKey
+ALTER TABLE [dbo].[cards] DROP CONSTRAINT [cards_deckId_fkey];
+
+-- AddForeignKey
+ALTER TABLE [dbo].[cards] ADD CONSTRAINT [cards_deckId_fkey] FOREIGN KEY ([deckId]) REFERENCES [dbo].[decks]([id]) ON DELETE CASCADE ON UPDATE CASCADE;
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH
